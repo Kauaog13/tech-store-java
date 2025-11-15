@@ -87,7 +87,6 @@ interface AuthState {
  * ! Para REGISTRAR:
  * ! Sempre criará um novo CLIENTE.
  * ! =================================================
- */
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
