@@ -7,6 +7,10 @@ C:\Users\gilma\OneDrive\Documentos\GitHub\tech-store-java\backend\src\main\java\
 C:\Users\gilma\OneDrive\Documentos\GitHub\tech-store-java\backend\src\main\java\com\techstore\config\DataInitializer.java
 C:\Users\gilma\OneDrive\Documentos\GitHub\tech-store-java\backend\src\main\java\com\techstore\config\JwtAuthFilter.java
 C:\Users\gilma\OneDrive\Documentos\GitHub\tech-store-java\backend\src\main\java\com\techstore\config\SecurityConfig.java
+C:\Users\gilma\OneDrive\Documentos\GitHub\tech-store-java\backend\src\main\java\com\techstore\dashboard\DashboardController.java
+C:\Users\gilma\OneDrive\Documentos\GitHub\tech-store-java\backend\src\main\java\com\techstore\dashboard\DashboardService.java
+C:\Users\gilma\OneDrive\Documentos\GitHub\tech-store-java\backend\src\main\java\com\techstore\dashboard\dto\DashboardDataDTO.java
+C:\Users\gilma\OneDrive\Documentos\GitHub\tech-store-java\backend\src\main\java\com\techstore\dashboard\dto\TopProdutoDTO.java
 C:\Users\gilma\OneDrive\Documentos\GitHub\tech-store-java\backend\src\main\java\com\techstore\exception\EstoqueInsuficienteException.java
 C:\Users\gilma\OneDrive\Documentos\GitHub\tech-store-java\backend\src\main\java\com\techstore\exception\GlobalExceptionHandler.java
 C:\Users\gilma\OneDrive\Documentos\GitHub\tech-store-java\backend\src\main\java\com\techstore\exception\ResourceNotFoundException.java

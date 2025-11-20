@@ -31,3 +31,18 @@ export interface Order {
   dataPedido: string;
   enderecoEntrega?: string;
 }
+
+export interface TopProduct {
+  nome: string;
+  totalVendido: number;
+}
+
+export interface DashboardData {
+  totalVendas: number;
+  totalPedidos: number;
+  totalProdutos: number;
+  ticketMedio: number;
+  pedidosRecentes: Order[];
+  produtosMaisVendidos: TopProduct[];
+  produtosBaixoEstoque: string[];
+}

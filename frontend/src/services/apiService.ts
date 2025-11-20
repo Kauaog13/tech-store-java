@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { User, Product, Order } from '@/types/models';
+import { User, Product, Order, DashboardData } from '@/types/models';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
@@ -106,6 +106,13 @@ export const orderService = {
     const response = await api.get<Order>(`/pedidos/${id}`);
     return response.data;
   },
+};
+
+export const adminService = {
+  getDashboard: async () => {
+    const response = await api.get<DashboardData>('/admin/dashboard');
+    return response.data;
+  }
 };
 
 export default api;
