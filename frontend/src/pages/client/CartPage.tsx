@@ -2,21 +2,44 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useCartStore } from '@/store/useCartStore';
+import { useAuthStore } from '@/store/useAuthStore'; // Para pegar o endereço padrão
 import { orderService } from '@/services/apiService';
 import { toast } from 'sonner';
-import { Trash2, ShoppingBag, Minus, Plus } from 'lucide-react';
+import { Trash2, ShoppingBag, Minus, Plus, MapPin } from 'lucide-react';
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, clearCart, getTotalValue } = useCartStore();
+  const { user } = useAuthStore();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState(''); // Estado para o endereço
   const navigate = useNavigate();
 
-  const handleFinalizePurchase = async () => {
+  // Abre o modal e preenche o endereço com o do cadastro
+  const handleInitiateCheckout = () => {
     if (items.length === 0) {
       toast.error('Carrinho vazio');
+      return;
+    }
+    setDeliveryAddress(user?.endereco || '');
+    setIsCheckoutOpen(true);
+  };
+
+  const handleConfirmPurchase = async () => {
+    if (!deliveryAddress.trim()) {
+      toast.error('Por favor, informe um endereço de entrega.');
       return;
     }
 
@@ -27,12 +50,14 @@ export default function CartPage() {
           produtoId: item.product.id,
           quantidade: item.quantidade,
         })),
+        enderecoEntrega: deliveryAddress, // Envia o endereço editado/confirmado
       };
 
       await orderService.create(orderData);
       clearCart();
+      setIsCheckoutOpen(false);
       toast.success('Pedido realizado com sucesso!');
-      navigate('/');
+      navigate('/'); // Ou redirecionar para uma página de "Meus Pedidos" se existisse
     } catch (error) {
       toast.error('Erro ao finalizar pedido. Tente novamente.');
     } finally {
@@ -77,6 +102,7 @@ export default function CartPage() {
       <h1 className="text-3xl font-bold mb-8">Carrinho de Compras</h1>
 
       <div className="grid lg:grid-cols-3 gap-8">
+        {/* Lista de Produtos (Esquerda) */}
         <div className="lg:col-span-2 space-y-4">
           {items.map((item) => (
             <Card key={item.product.id}>
@@ -139,6 +165,7 @@ export default function CartPage() {
           ))}
         </div>
 
+        {/* Resumo do Pedido (Direita) */}
         <div className="lg:col-span-1">
           <Card className="sticky top-24">
             <CardHeader>
@@ -163,17 +190,64 @@ export default function CartPage() {
             </CardContent>
             <CardFooter>
               <Button
-                onClick={handleFinalizePurchase}
-                disabled={isProcessing}
+                onClick={handleInitiateCheckout} // Abre o modal
                 className="w-full"
                 size="lg"
               >
-                {isProcessing ? 'Processando...' : 'Finalizar Compra'}
+                Continuar para Entrega
               </Button>
             </CardFooter>
           </Card>
         </div>
       </div>
+
+      {/* Modal de Confirmação e Endereço */}
+      <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Finalizar Compra</DialogTitle>
+            <DialogDescription>
+              Confirme o endereço de entrega para este pedido.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="address" className="flex items-center gap-2">
+                <MapPin className="w-4 h-4" /> Endereço de Entrega
+              </Label>
+              <Input
+                id="address"
+                value={deliveryAddress}
+                onChange={(e) => setDeliveryAddress(e.target.value)}
+                placeholder="Rua, número, bairro, cidade..."
+              />
+              <p className="text-xs text-muted-foreground">
+                Este endereço será usado apenas para este pedido e não altera seu perfil.
+              </p>
+            </div>
+
+            <div className="rounded-lg bg-muted p-4">
+              <div className="flex justify-between font-semibold">
+                <span>Total a Pagar:</span>
+                <span>R$ {totalValue.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCheckoutOpen(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleConfirmPurchase} 
+              disabled={isProcessing}
+            >
+              {isProcessing ? 'Processando...' : 'Confirmar Pedido'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

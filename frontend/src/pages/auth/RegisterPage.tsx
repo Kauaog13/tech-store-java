@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthStore } from '@/store/useAuthStore';
 import { toast } from 'sonner';
-import { Store } from 'lucide-react';
+import { Store, Loader2 } from 'lucide-react';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -39,10 +39,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 flex flex-col items-center">
-          <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mb-2">
+    <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
+      <Card className="w-full max-w-md shadow-lg border-slate-200 dark:border-slate-800">
+        <CardHeader className="space-y-1 flex flex-col items-center text-center">
+          <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mb-4 shadow-sm">
             <Store className="w-6 h-6 text-primary-foreground" />
           </div>
           <CardTitle className="text-2xl font-bold">Criar Conta</CardTitle>
@@ -60,6 +60,7 @@ export default function RegisterPage() {
                 value={formData.nome}
                 onChange={handleChange}
                 required
+                className="bg-white dark:bg-slate-900"
               />
             </div>
             <div className="space-y-2">
@@ -72,6 +73,7 @@ export default function RegisterPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
+                className="bg-white dark:bg-slate-900"
               />
             </div>
             <div className="space-y-2">
@@ -84,6 +86,7 @@ export default function RegisterPage() {
                 value={formData.endereco}
                 onChange={handleChange}
                 required
+                className="bg-white dark:bg-slate-900"
               />
             </div>
             <div className="space-y-2">
@@ -96,12 +99,20 @@ export default function RegisterPage() {
                 value={formData.senha}
                 onChange={handleChange}
                 required
+                className="bg-white dark:bg-slate-900"
               />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Criando conta...' : 'Criar Conta'}
+            <Button type="submit" className="w-full font-semibold" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Criando conta...
+                </>
+              ) : (
+                'Criar Conta'
+              )}
             </Button>
             <p className="text-sm text-center text-muted-foreground">
               Já tem uma conta?{' '}

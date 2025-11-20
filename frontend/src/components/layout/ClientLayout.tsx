@@ -16,15 +16,16 @@ import { Store, ShoppingCart, User, LogOut } from 'lucide-react';
 export default function ClientLayout() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
-  const getTotalItems = useCartStore((state) => state.getTotalItems);
   const navigate = useNavigate();
+
+  // CORREÇÃO: Usar o seletor do Zustand para obter o valor reativo diretamente.
+  // Quando 'items' mudar no store, este componente será re-renderizado automaticamente.
+  const cartItemCount = useCartStore((state) => state.getTotalItems());
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
-
-  const cartItemCount = getTotalItems();
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">

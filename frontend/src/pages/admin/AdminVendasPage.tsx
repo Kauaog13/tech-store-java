@@ -22,17 +22,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Order } from '@/types/models';
 import { orderService } from '@/services/apiService';
 import { toast } from 'sonner';
-import { Eye, Loader2 } from 'lucide-react';
+import { Eye, Loader2, Trash2 } from 'lucide-react';
 
 export default function AdminVendasPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  // Estados para controlar os Modais de Confirmação (2 etapas)
+  const [pendingStatusChange, setPendingStatusChange] = useState<{ id: number, status: Order['status'] } | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
   useEffect(() => {
     loadOrders();
@@ -41,7 +55,8 @@ export default function AdminVendasPage() {
   const loadOrders = async () => {
     try {
       const data = await orderService.getAll();
-      setOrders(data);
+      // Ordena por ID decrescente para ver os mais recentes primeiro
+      setOrders(data.sort((a, b) => b.id - a.id));
     } catch (error) {
       toast.error('Erro ao carregar pedidos');
     } finally {
@@ -49,19 +64,54 @@ export default function AdminVendasPage() {
     }
   };
 
-  const handleStatusChange = async (orderId: number, newStatus: Order['status']) => {
+  // 1. Inicia o fluxo de mudança de status
+  const initiateStatusChange = (orderId: number, newStatus: Order['status']) => {
+    // Se for cancelar, exige confirmação extra
+    if (newStatus === 'CANCELADO') {
+      setPendingStatusChange({ id: orderId, status: newStatus });
+    } else {
+      // Se não for cancelamento, executa direto (ou pode adicionar confirmação se desejar)
+      handleConfirmStatusChange(orderId, newStatus);
+    }
+  };
+
+  // 2. Executa a mudança de status (Confirmado)
+  const handleConfirmStatusChange = async (orderId: number, newStatus: Order['status']) => {
     try {
       await orderService.updateStatus(orderId, newStatus);
-      toast.success('Status atualizado com sucesso!');
+      toast.success(newStatus === 'CANCELADO' 
+        ? 'Pedido cancelado e estoque estornado!' 
+        : 'Status atualizado com sucesso!');
       loadOrders();
     } catch (error) {
-      toast.error('Erro ao atualizar status');
+      toast.error('Erro ao atualizar status. Verifique se o pedido já não está cancelado.');
+    } finally {
+      setPendingStatusChange(null);
+    }
+  };
+
+  // 3. Inicia o fluxo de exclusão permanente
+  const initiateDelete = (orderId: number) => {
+    setPendingDeleteId(orderId);
+  };
+
+  // 4. Executa a exclusão (Confirmado)
+  const handleConfirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    try {
+      await orderService.delete(pendingDeleteId);
+      toast.success('Pedido excluído permanentemente!');
+      loadOrders();
+    } catch (error) {
+      toast.error('Erro ao excluir pedido.');
+    } finally {
+      setPendingDeleteId(null);
     }
   };
 
   const handleViewDetails = (order: Order) => {
     setSelectedOrder(order);
-    setIsDialogOpen(true);
+    setIsDetailsOpen(true);
   };
 
   const getStatusBadge = (status: Order['status']) => {
@@ -98,18 +148,18 @@ export default function AdminVendasPage() {
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Gerenciar Vendas</h1>
-        <p className="text-muted-foreground">Gerencie pedidos e acompanhe vendas</p>
+        <p className="text-muted-foreground">Gerencie pedidos, cancele ou exclua vendas.</p>
       </div>
 
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID Pedido</TableHead>
+              <TableHead>ID</TableHead>
               <TableHead>Cliente</TableHead>
               <TableHead>Data</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Valor Total</TableHead>
+              <TableHead>Total</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -136,14 +186,17 @@ export default function AdminVendasPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleViewDetails(order)}
+                        title="Ver Detalhes"
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
+                      
                       <Select
                         value={order.status}
                         onValueChange={(value) =>
-                          handleStatusChange(order.id, value as Order['status'])
+                          initiateStatusChange(order.id, value as Order['status'])
                         }
+                        disabled={order.status === 'CANCELADO'}
                       >
                         <SelectTrigger className="w-32">
                           <SelectValue />
@@ -152,9 +205,21 @@ export default function AdminVendasPage() {
                           <SelectItem value="PENDENTE">Pendente</SelectItem>
                           <SelectItem value="PAGO">Pago</SelectItem>
                           <SelectItem value="ENVIADO">Enviado</SelectItem>
-                          <SelectItem value="CANCELADO">Cancelado</SelectItem>
+                          <SelectItem value="CANCELADO" className="text-destructive font-medium">
+                            Cancelar
+                          </SelectItem>
                         </SelectContent>
                       </Select>
+
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:bg-destructive/10"
+                        onClick={() => initiateDelete(order.id)}
+                        title="Excluir Permanentemente"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -164,13 +229,12 @@ export default function AdminVendasPage() {
         </Table>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      {/* Modal de Detalhes do Pedido */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Detalhes do Pedido #{selectedOrder?.id}</DialogTitle>
-            <DialogDescription>
-              Informações completas do pedido
-            </DialogDescription>
+            <DialogDescription>Informações completas do pedido</DialogDescription>
           </DialogHeader>
           {selectedOrder && (
             <div className="space-y-6">
@@ -181,11 +245,11 @@ export default function AdminVendasPage() {
                   <p className="text-sm">{selectedOrder.cliente.email}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Endereço de Entrega</p>
+                  <p className="text-sm text-muted-foreground">Endereço</p>
                   <p className="font-medium">{selectedOrder.cliente.endereco}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Data do Pedido</p>
+                  <p className="text-sm text-muted-foreground">Data</p>
                   <p className="font-medium">{formatDate(selectedOrder.dataPedido)}</p>
                 </div>
                 <div>
@@ -194,14 +258,12 @@ export default function AdminVendasPage() {
                 </div>
               </div>
 
-              <div>
-                <h3 className="font-semibold mb-3">Itens do Pedido</h3>
-                <div className="border rounded-lg">
+              <div className="border rounded-lg">
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Produto</TableHead>
-                        <TableHead className="text-center">Quantidade</TableHead>
+                        <TableHead className="text-center">Qtd</TableHead>
                         <TableHead className="text-right">Preço Unitário</TableHead>
                         <TableHead className="text-right">Subtotal</TableHead>
                       </TableRow>
@@ -211,30 +273,79 @@ export default function AdminVendasPage() {
                         <TableRow key={index}>
                           <TableCell>{item.product.nome}</TableCell>
                           <TableCell className="text-center">{item.quantidade}</TableCell>
-                          <TableCell className="text-right">
-                            R$ {item.product.preco.toFixed(2)}
-                          </TableCell>
+                          <TableCell className="text-right">R$ {item.product.preco.toFixed(2)}</TableCell>
                           <TableCell className="text-right font-medium">
                             R$ {(item.product.preco * item.quantidade).toFixed(2)}
                           </TableCell>
                         </TableRow>
                       ))}
                       <TableRow>
-                        <TableCell colSpan={3} className="text-right font-semibold">
-                          Total
-                        </TableCell>
+                        <TableCell colSpan={3} className="text-right font-semibold">Total</TableCell>
                         <TableCell className="text-right font-bold text-lg text-primary">
                           R$ {selectedOrder.valorTotal.toFixed(2)}
                         </TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
-                </div>
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* 1. Alerta de Confirmação para CANCELAMENTO */}
+      <AlertDialog open={!!pendingStatusChange} onOpenChange={() => setPendingStatusChange(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tem certeza que deseja cancelar?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Você está prestes a cancelar o Pedido <strong>#{pendingStatusChange?.id}</strong>.
+              <br /><br />
+              Esta ação irá <strong>estornar automaticamente</strong> todos os itens para o estoque.
+              O status "Cancelado" não pode ser revertido posteriormente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Não, manter pedido</AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (pendingStatusChange) {
+                  handleConfirmStatusChange(pendingStatusChange.id, pendingStatusChange.status);
+                }
+              }}
+            >
+              Sim, Cancelar Pedido
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* 2. Alerta de Confirmação para EXCLUSÃO PERMANENTE */}
+      <AlertDialog open={!!pendingDeleteId} onOpenChange={() => setPendingDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">Excluir Permanentemente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Atenção! Você está prestes a <strong>apagar definitivamente</strong> o Pedido <strong>#{pendingDeleteId}</strong> do banco de dados.
+              <br /><br />
+              Isso removerá todo o histórico desta venda. Se o pedido ainda estava ativo, o estoque será devolvido antes da exclusão.
+              <br />
+              <strong>Esta ação é irreversível.</strong>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={handleConfirmDelete}
+            >
+              Excluir Definitivamente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
 }

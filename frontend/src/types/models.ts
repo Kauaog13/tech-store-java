@@ -1,4 +1,14 @@
-// Maps the 'usuarios' table (id: BIGINT)
+export interface Product {
+  id: number;
+  nome: string;
+  preco: number;
+  estoque: number;
+  categoria: string;
+  descricao: string; // Novo campo
+  imagemUrl: string;
+}
+
+// ... outras interfaces (User, CartItem, Order) mantêm-se iguais
 export interface User {
   id: number;
   nome: string;
@@ -7,22 +17,11 @@ export interface User {
   role: 'CLIENTE' | 'ADMIN';
 }
 
-// Maps the 'produtos' table (id: BIGINT)
-export interface Product {
-  id: number;
-  nome: string;
-  preco: number;
-  estoque: number;
-  imagemUrl: string;
-}
-
-// Logical interface for the Zustand cart store
 export interface CartItem {
   product: Product;
   quantidade: number;
 }
 
-// Maps the 'pedidos' table (id: BIGINT)
 export interface Order {
   id: number;
   cliente: User;
@@ -30,4 +29,5 @@ export interface Order {
   status: 'PENDENTE' | 'PAGO' | 'ENVIADO' | 'CANCELADO';
   valorTotal: number;
   dataPedido: string;
+  enderecoEntrega?: string;
 }

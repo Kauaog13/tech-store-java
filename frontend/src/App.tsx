@@ -5,7 +5,14 @@ function App() {
   return (
     <>
       <AppRoutes />
-      <Toaster position="top-right" richColors />
+      {/* A propriedade duration={5000} define o tempo para 5 segundos (5000ms) */}
+      {/* A propriedade closeButton adiciona um botão de fechar manual também */}
+      <Toaster 
+        position="top-right" 
+        richColors 
+        duration={5000} 
+        closeButton 
+      />
     </>
   );
 }
