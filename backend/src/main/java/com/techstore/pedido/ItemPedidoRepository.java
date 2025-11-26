@@ -8,10 +8,10 @@ import org.springframework.data.domain.Pageable;
 
 public interface ItemPedidoRepository extends JpaRepository<ItemPedido, Long> {
 
-    // Agrega itens vendidos por produto e ordena decrescente
+    // GRÁFICO TOP PRODUTOS: Contabiliza apenas itens de pedidos PAGOS ou ENVIADOS
     @Query("SELECT new com.techstore.dashboard.dto.TopProdutoDTO(i.produto.nome, SUM(i.quantidade)) " +
            "FROM ItemPedido i " +
-           "WHERE i.pedido.status <> 'CANCELADO' " +
+           "WHERE i.pedido.status IN ('PAGO', 'ENVIADO') " +
            "GROUP BY i.produto.nome " +
            "ORDER BY SUM(i.quantidade) DESC")
     List<TopProdutoDTO> findMostSoldProducts(Pageable pageable);

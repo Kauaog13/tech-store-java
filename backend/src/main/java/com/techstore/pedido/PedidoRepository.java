@@ -7,14 +7,14 @@ import java.util.List;
 
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     
-    // Soma total de vendas (excluindo cancelados)
-    @Query("SELECT SUM(p.valorTotal) FROM Pedido p WHERE p.status <> 'CANCELADO'")
+    // SOMA FINANCEIRA: Continua restrita (Apenas 'PAGO' ou 'ENVIADO')
+    @Query("SELECT SUM(p.valorTotal) FROM Pedido p WHERE p.status IN ('PAGO', 'ENVIADO')")
     BigDecimal sumValorTotalVendas();
 
-    // Contagem de pedidos válidos
-    @Query("SELECT COUNT(p) FROM Pedido p WHERE p.status <> 'CANCELADO'")
+    // CONTAGEM DE PEDIDOS VÁLIDOS: Continua restrita
+    @Query("SELECT COUNT(p) FROM Pedido p WHERE p.status IN ('PAGO', 'ENVIADO')")
     Long countPedidosValidos();
 
-    // Pedidos recentes (Top 5)
+    // LISTA RECENTE (NOVO): Traz os últimos 5 pedidos INDEPENDENTE do status
     List<Pedido> findTop5ByOrderByDataPedidoDesc();
 }

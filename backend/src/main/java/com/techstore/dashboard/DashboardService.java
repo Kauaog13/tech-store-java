@@ -26,27 +26,28 @@ public class DashboardService {
 
     @Transactional(readOnly = true)
     public DashboardDataDTO getDashboardData() {
-        // 1. Vendas Totais
+        // 1. Vendas Totais (Mantém filtro financeiro rigoroso)
         BigDecimal totalVendas = pedidoRepository.sumValorTotalVendas();
         if (totalVendas == null) totalVendas = BigDecimal.ZERO;
 
-        // 2. Total Pedidos e Ticket Médio
+        // 2. Total Pedidos (Mantém filtro financeiro rigoroso)
         Long totalPedidos = pedidoRepository.countPedidosValidos();
+        
         BigDecimal ticketMedio = BigDecimal.ZERO;
         if (totalPedidos > 0) {
             ticketMedio = totalVendas.divide(BigDecimal.valueOf(totalPedidos), 2, RoundingMode.HALF_UP);
         }
 
-        // 3. Total Produtos Cadastrados
+        // 3. Total Produtos
         Long totalProdutos = produtoRepository.count();
 
-        // 4. Pedidos Recentes (Converter para DTO)
+        // 4. Pedidos Recentes (ALTERADO: Agora busca TODOS os status)
         List<PedidoDTO> pedidosRecentes = pedidoRepository.findTop5ByOrderByDataPedidoDesc()
                 .stream()
                 .map(PedidoDTO::fromEntity)
                 .collect(Collectors.toList());
 
-        // 5. Produtos Mais Vendidos (Top 5)
+        // 5. Produtos Mais Vendidos (Mantém filtro para mostrar o que realmente vendeu)
         List<TopProdutoDTO> topProdutos = itemPedidoRepository.findMostSoldProducts(PageRequest.of(0, 5));
 
         // 6. Baixo Estoque
