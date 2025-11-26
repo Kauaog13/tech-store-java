@@ -36,9 +36,11 @@ public class Pedido {
     @Column(name = "valor_total", precision = 10, scale = 2)
     private BigDecimal valorTotal;
     
-    // NOVO CAMPO: Armazena o endereço específico deste pedido
     @Column(name = "endereco_entrega", nullable = false)
     private String enderecoEntrega;
+
+    @Column(name = "forma_pagamento", nullable = false)
+    private String formaPagamento;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ItemPedido> itens;

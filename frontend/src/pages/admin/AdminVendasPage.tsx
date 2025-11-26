@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom'; // Importação necessária
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -37,7 +37,7 @@ import { Badge } from '@/components/ui/badge';
 import { Order } from '@/types/models';
 import { orderService } from '@/services/apiService';
 import { toast } from 'sonner';
-import { Eye, Loader2, Trash2, FilterX } from 'lucide-react';
+import { Eye, Loader2, Trash2, FilterX, MapPin, CreditCard, User } from 'lucide-react';
 
 export default function AdminVendasPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -45,7 +45,6 @@ export default function AdminVendasPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   
-  // Hook para ler parâmetros da URL (ex: ?pedidoId=10)
   const [searchParams, setSearchParams] = useSearchParams();
   const pedidoIdParam = searchParams.get('pedidoId');
 
@@ -56,7 +55,6 @@ export default function AdminVendasPage() {
     loadOrders();
   }, []);
 
-  // Efeito para abrir automaticamente o modal se houver um ID na URL
   useEffect(() => {
     if (pedidoIdParam && orders.length > 0) {
         const orderId = parseInt(pedidoIdParam);
@@ -122,12 +120,55 @@ export default function AdminVendasPage() {
     setIsDetailsOpen(true);
   };
 
-  // Ao fechar o modal, limpamos o parametro da URL para não reabrir ao atualizar a pagina
   const handleCloseDetails = (open: boolean) => {
       setIsDetailsOpen(open);
       if (!open && pedidoIdParam) {
           setSearchParams({});
       }
+  };
+
+  // Parse endereço para exibição detalhada (sem precisar buscar pagamento daqui)
+  const parseAddressDetails = (fullString: string) => {
+    let details = { rua: fullString, numero: '', cidade: '', estado: '', cep: '', referencia: '' };
+    try {
+        let addr = fullString;
+        
+        if (addr.includes('| CEP:')) {
+            const parts = addr.split('| CEP:');
+            addr = parts[0].trim();
+            let cepPart = parts[1].trim();
+            if (cepPart.includes('(')) {
+                const cepSplit = cepPart.split('(');
+                details.cep = cepSplit[0].trim();
+                details.referencia = cepSplit[1].replace(')', '').trim();
+            } else {
+                details.cep = cepPart;
+            }
+        }
+
+        if (addr.includes(' - ')) {
+            const parts = addr.split(' - ');
+            addr = parts[0].trim();
+            let cityState = parts[1].trim();
+            if (cityState.includes('/')) {
+                const csParts = cityState.split('/');
+                details.cidade = csParts[0].trim();
+                details.estado = csParts[1].trim();
+            } else {
+                details.cidade = cityState;
+            }
+        }
+
+        if (addr.includes(', Nº ')) {
+            const parts = addr.split(', Nº ');
+            details.rua = parts[0].trim();
+            details.numero = parts[1].trim();
+        } else {
+            details.rua = addr;
+        }
+
+    } catch (e) { return details; }
+    return details;
   };
 
   const getStatusBadge = (status: Order['status']) => {
@@ -155,7 +196,6 @@ export default function AdminVendasPage() {
     );
   }
 
-  // Se estiver filtrando por um pedido específico, mostramos um aviso/botão para limpar
   const isFiltering = !!pedidoIdParam;
   const filteredOrders = isFiltering 
       ? orders.filter(o => o.id === parseInt(pedidoIdParam)) 
@@ -259,7 +299,6 @@ export default function AdminVendasPage() {
         </Table>
       </div>
 
-      {/* Modal de Detalhes */}
       <Dialog open={isDetailsOpen} onOpenChange={handleCloseDetails}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
@@ -270,20 +309,51 @@ export default function AdminVendasPage() {
             <DialogDescription>Realizado em {selectedOrder && formatDate(selectedOrder.dataPedido)}</DialogDescription>
           </DialogHeader>
           
-          {selectedOrder && (
+          {selectedOrder && (() => {
+            const details = parseAddressDetails(selectedOrder.enderecoEntrega || '');
+            return (
             <div className="grid gap-6 py-4">
-              <div className="grid md:grid-cols-2 gap-6 p-4 bg-muted/30 rounded-lg border">
-                <div>
-                  <h4 className="font-semibold mb-2 text-sm uppercase tracking-wide text-muted-foreground">Dados do Cliente</h4>
-                  <p className="font-medium">{selectedOrder.cliente.nome}</p>
-                  <p className="text-sm text-muted-foreground">{selectedOrder.cliente.email}</p>
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Cliente */}
+                <div className="p-4 bg-muted/30 rounded-lg border space-y-3">
+                  <h4 className="font-semibold flex items-center gap-2 text-primary">
+                    <User className="w-4 h-4" /> Dados do Cliente
+                  </h4>
+                  <div className="text-sm">
+                    <p className="font-medium">{selectedOrder.cliente.nome}</p>
+                    <p className="text-muted-foreground">{selectedOrder.cliente.email}</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold mb-2 text-sm uppercase tracking-wide text-muted-foreground">Entrega</h4>
-                  <p className="text-sm">{selectedOrder.enderecoEntrega || selectedOrder.cliente.endereco}</p>
+
+                {/* Pagamento (Lido direto do objeto) */}
+                <div className="p-4 bg-muted/30 rounded-lg border space-y-3">
+                  <h4 className="font-semibold flex items-center gap-2 text-primary">
+                    <CreditCard className="w-4 h-4" /> Pagamento
+                  </h4>
+                  <div className="text-sm">
+                    <span className="block text-muted-foreground mb-1">Método:</span>
+                    <span className="font-bold text-lg">{selectedOrder.formaPagamento}</span>
+                  </div>
                 </div>
               </div>
 
+              {/* Endereço Completo */}
+              <div className="p-4 bg-muted/30 rounded-lg border space-y-3">
+                  <h4 className="font-semibold flex items-center gap-2 text-primary">
+                    <MapPin className="w-4 h-4" /> Endereço de Entrega
+                  </h4>
+                  <div className="grid grid-cols-2 gap-y-2 text-sm">
+                      <p><span className="font-medium">Rua:</span> {details.rua}</p>
+                      <p><span className="font-medium">Número:</span> {details.numero}</p>
+                      <p><span className="font-medium">Cidade/UF:</span> {details.cidade}/{details.estado}</p>
+                      <p><span className="font-medium">CEP:</span> {details.cep}</p>
+                      {details.referencia && (
+                        <p className="col-span-2"><span className="font-medium">Referência:</span> {details.referencia}</p>
+                      )}
+                  </div>
+              </div>
+
+              {/* Itens */}
               <div>
                   <h4 className="font-semibold mb-3">Itens do Pedido</h4>
                   <div className="border rounded-lg overflow-hidden">
@@ -320,11 +390,11 @@ export default function AdminVendasPage() {
                   </div>
               </div>
             </div>
-          )}
+            );
+          })()}
         </DialogContent>
       </Dialog>
 
-      {/* Alertas de Confirmação (Delete e Cancelar) mantidos iguais */}
       <AlertDialog open={!!pendingStatusChange} onOpenChange={() => setPendingStatusChange(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

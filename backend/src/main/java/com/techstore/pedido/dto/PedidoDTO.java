@@ -9,14 +9,15 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// Mapeia a interface 'Order' do models.ts
 public record PedidoDTO(
     Long id,
     UsuarioDTO cliente,
     List<ItemPedidoDTO> itens,
     StatusPedido status,
     BigDecimal valorTotal,
-    Instant dataPedido // O frontend (TS) trata a string ISO
+    Instant dataPedido,
+    String enderecoEntrega,
+    String formaPagamento 
 ) {
     public static PedidoDTO fromEntity(Pedido pedido) {
         return new PedidoDTO(
@@ -27,7 +28,9 @@ public record PedidoDTO(
                 .collect(Collectors.toList()),
             pedido.getStatus(),
             pedido.getValorTotal(),
-            pedido.getDataPedido()
+            pedido.getDataPedido(),
+            pedido.getEnderecoEntrega(),
+            pedido.getFormaPagamento()
         );
     }
 }

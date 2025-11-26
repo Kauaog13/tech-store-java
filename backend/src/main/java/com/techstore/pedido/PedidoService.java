@@ -27,10 +27,6 @@ public class PedidoService {
     private final ProdutoRepository produtoRepository;
     private final UsuarioRepository usuarioRepository;
 
-    /**
-     * Cria um novo pedido (Cliente).
-     * Realiza a baixa no estoque.
-     */
     @Transactional
     public PedidoDTO createPedido(CreatePedidoRequest request) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -44,6 +40,7 @@ public class PedidoService {
         Pedido pedido = Pedido.builder()
                 .cliente(cliente)
                 .enderecoEntrega(enderecoEntrega)
+                .formaPagamento(request.formaPagamento())
                 .status(StatusPedido.PENDENTE)
                 .itens(new ArrayList<>())
                 .build();
@@ -62,7 +59,6 @@ public class PedidoService {
                 );
             }
 
-            // Baixa no estoque
             produto.setEstoque(produto.getEstoque() - itemRequest.quantidade());
             produtoRepository.save(produto);
 
@@ -85,19 +81,13 @@ public class PedidoService {
 
         return PedidoDTO.fromEntity(savedPedido);
     }
-
-    /**
-     * Lista todos os pedidos (Admin).
-     */
+    
     public List<PedidoDTO> getAllPedidos() {
         return pedidoRepository.findAll().stream()
                 .map(PedidoDTO::fromEntity)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Busca pedidos de um cliente específico (Cliente).
-     */
     public List<PedidoDTO> getPedidosByCliente(Long clienteId) {
         return pedidoRepository.findAll().stream()
                 .filter(p -> p.getCliente().getId().equals(clienteId))
@@ -105,9 +95,6 @@ public class PedidoService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Permite ao cliente cancelar seu próprio pedido.
-     */
     @Transactional
     public PedidoDTO cancelarPedidoCliente(Long pedidoId, Long clienteId) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
@@ -124,10 +111,6 @@ public class PedidoService {
         return updatePedidoStatus(pedidoId, StatusPedido.CANCELADO);
     }
 
-    /**
-     * Atualiza o status do pedido (Admin ou Sistema).
-     * Realiza estorno de estoque se cancelar.
-     */
     @Transactional
     public PedidoDTO updatePedidoStatus(Long pedidoId, StatusPedido newStatus) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
@@ -147,10 +130,6 @@ public class PedidoService {
         return PedidoDTO.fromEntity(updatedPedido);
     }
 
-    /**
-     * Remove o pedido permanentemente (Admin).
-     * Realiza estorno antes de excluir se o pedido estava ativo.
-     */
     @Transactional
     public void deletePedido(Long pedidoId) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
@@ -163,9 +142,6 @@ public class PedidoService {
         pedidoRepository.delete(pedido);
     }
 
-    /**
-     * Devolve itens ao estoque.
-     */
     private void returnStock(Pedido pedido) {
         for (ItemPedido item : pedido.getItens()) {
             Produto produto = item.getProduto();

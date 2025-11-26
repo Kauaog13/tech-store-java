@@ -4,11 +4,10 @@ export interface Product {
   preco: number;
   estoque: number;
   categoria: string;
-  descricao: string; // Novo campo
+  descricao: string;
   imagemUrl: string;
 }
 
-// ... outras interfaces (User, CartItem, Order) mantêm-se iguais
 export interface User {
   id: number;
   nome: string;
@@ -30,6 +29,7 @@ export interface Order {
   valorTotal: number;
   dataPedido: string;
   enderecoEntrega?: string;
+  formaPagamento: string;
 }
 
 export interface TopProduct {

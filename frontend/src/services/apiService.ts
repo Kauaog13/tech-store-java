@@ -67,41 +67,35 @@ export const productService = {
 
 export const orderService = {
   // Cliente: Criar Pedido
-  create: async (data: { itens: { produtoId: number; quantidade: number }[], enderecoEntrega: string }) => {
+  create: async (data: { itens: { produtoId: number; quantidade: number }[], enderecoEntrega: string, formaPagamento: string }) => {
     const response = await api.post<Order>('/pedidos', data);
     return response.data;
   },
   
-  // Cliente: Meus Pedidos
   getMyOrders: async () => {
     const response = await api.get<Order[]>('/pedidos/meus');
     return response.data;
   },
   
-  // Cliente: Cancelar Meu Pedido
   cancelMyOrder: async (id: number) => {
     const response = await api.put<Order>(`/pedidos/${id}/cancelar`);
     return response.data;
   },
 
-  // Admin: Listar Todos
   getAll: async () => {
     const response = await api.get<Order[]>('/admin/vendas');
     return response.data;
   },
   
-  // Admin: Atualizar Status
   updateStatus: async (id: number, status: Order['status']) => {
     const response = await api.put<Order>(`/admin/vendas/${id}/status`, { status });
     return response.data;
   },
   
-  // Admin: Excluir
   delete: async (id: number) => {
     await api.delete(`/admin/vendas/${id}`);
   },
   
-  // Comum (se necessário)
   getById: async (id: number) => {
     const response = await api.get<Order>(`/pedidos/${id}`);
     return response.data;

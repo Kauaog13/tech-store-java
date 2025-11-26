@@ -7,7 +7,8 @@ import java.util.List;
 
 public record CreatePedidoRequest(
     @NotEmpty List<ItemRequest> itens,
-    @NotEmpty String enderecoEntrega 
+    @NotEmpty String enderecoEntrega,
+    @NotEmpty String formaPagamento
 ) {
     public record ItemRequest(
         @NotNull Long produtoId,

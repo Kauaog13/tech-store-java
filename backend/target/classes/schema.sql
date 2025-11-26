@@ -5,7 +5,6 @@ DROP TABLE IF EXISTS pedidos;
 DROP TABLE IF EXISTS produtos;
 DROP TABLE IF EXISTS usuarios;
 
--- ... (Tabela usuarios igual ao anterior)
 CREATE TABLE usuarios (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
@@ -21,11 +20,10 @@ CREATE TABLE produtos (
     preco DECIMAL(10, 2) NOT NULL,
     estoque INT NOT NULL,
     categoria VARCHAR(100) NOT NULL,
-    descricao TEXT, -- Nova coluna
+    descricao TEXT,
     imagem_url VARCHAR(1024)
 );
 
--- ... (Tabelas pedidos e itens_pedido iguais ao anterior)
 CREATE TABLE pedidos (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     cliente_id BIGINT NOT NULL,
@@ -33,6 +31,7 @@ CREATE TABLE pedidos (
     status ENUM('PENDENTE', 'PAGO', 'ENVIADO', 'CANCELADO') NOT NULL,
     valor_total DECIMAL(10, 2) NOT NULL,
     endereco_entrega VARCHAR(255) NOT NULL,
+    forma_pagamento VARCHAR(50) NOT NULL,
     FOREIGN KEY (cliente_id) REFERENCES usuarios(id)
 );
 
