@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="./assets/images/TechStoreBanner.png" alt="TechStore Banner" />
+  <img src="./assets/images/BannersTechStore/TechStoreBanner.png" alt="TechStore Banner" />
 </p>
 
-# 🛒 TechStore v1.1.0 — Sistema de Loja Online (Full-Stack)
+# 🛒 TechStore v1.1.3 — Sistema de Loja Online (Full-Stack)
 
-Este repositório contém a versão **1.1.0** da **TechStore**, um sistema completo de e-commerce desenvolvido com:
+Este repositório contém a versão **1.1.3** da **TechStore**, um sistema completo de e-commerce desenvolvido com:
 
 - **Backend:** Java (Spring Boot) + Maven  
 - **Frontend:** React + TypeScript + Vite  
@@ -18,13 +18,13 @@ A aplicação oferece uma experiência completa para **Clientes** e **Administra
 
 # 📌 1. Introdução
 
-A **TechStore v1.1.0** é um e-commerce especializado em **componentes e periféricos de PC**, construído com arquitetura totalmente desacoplada:
+A **TechStore v1.1.3** é um e-commerce especializado em **componentes e periféricos de PC**, construído com arquitetura totalmente desacoplada:
 
 - **Backend:** API RESTful robusta em Java  
 - **Frontend:** SPA moderna em React/TypeScript  
 - **Banco MySQL:** Persistência consistente  
 
-A versão **1.1.0** aprimora o sistema com:
+A versão **1.1.3** aprimora o sistema com:
 
 ✔ Fluxo de compras completo  
 ✔ Cancelamento de pedidos pelo cliente  
@@ -36,7 +36,7 @@ A versão **1.1.0** aprimora o sistema com:
 
 # 🎯 2. Objetivo do Sistema
 
-A versão 1.1.0 busca consolidar um ecossistema completo de e-commerce com funcionalidades distintas para cada perfil de usuário.
+A versão 1.1.3 busca consolidar um ecossistema completo de e-commerce com funcionalidades distintas para cada perfil de usuário.
 
 ## 👤 Fluxo do Cliente
 - Criar conta e editar perfil  
@@ -55,16 +55,15 @@ A versão 1.1.0 busca consolidar um ecossistema completo de e-commerce com funci
 
 ---
 
-# ⚙️ 3. Funcionalidades (Escopo v1.1.0)
+# ⚙️ 3. Funcionalidades (Escopo v1.1.3)
 
 ## **3.1. Autenticação e Contas**
 - Login com diferenciação de papéis (CLIENTE / ADMIN)  
 - Registro de clientes  
-- Logout seguro  
-
-<img width="480" height="476" alt="image" src="https://github.com/user-attachments/assets/ce540911-fb8f-4997-9863-cfcda23b712f" />
-
----
+- Logout seguro
+  
+<img width="437" height="641" alt="image" src="https://github.com/user-attachments/assets/7b332b1e-d196-47b0-95c1-1309e15c4770" />
+<img width="435" height="458" alt="image" src="https://github.com/user-attachments/assets/4e8fae67-c5f4-43a5-979f-6c8e777eac8c" />
 
 ## **3.2. Módulo do Cliente**
 
@@ -73,43 +72,44 @@ A versão 1.1.0 busca consolidar um ecossistema completo de e-commerce com funci
 - Editar nome e endereço  
 - Acessar todos os pedidos (incluindo cancelados)
 
-<img width="944" height="633" alt="image" src="https://github.com/user-attachments/assets/57b59934-9445-4377-8753-d7a5fcdf844e" />
-
+<img width="938" height="872" alt="image" src="https://github.com/user-attachments/assets/2ec32d69-7ad9-4b5f-a286-bfa2a8324591" />
 
 ### 🛍️ Catálogo
 - Listagem completa de produtos  
-- Página de detalhes  
+- Página de detalhes
+- Página Detalhada do Produto
 
-<img width="1902" height="925" alt="image" src="https://github.com/user-attachments/assets/e95a3891-74ed-4096-b1da-ec149192a3f0" />
-
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/54d4f77c-29c9-4f9a-9723-70d5c161f964" />
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/1f2ad10e-402d-4a89-ab44-e3a1b6447da7" />
 
 ### 🛒 Carrinho
 - Adicionar itens  
 - Atualizar quantidades  
 - Remover itens  
 
-<img width="929" height="412" alt="image" src="https://github.com/user-attachments/assets/6b26fc33-e615-496f-a3ab-c6869c38be03" />
-
+<img width="979" height="432" alt="image" src="https://github.com/user-attachments/assets/e4c5b283-7207-4cc3-b93f-626c57b56520" />
 
 ### 🧾 Checkout
 - Autopreenchimento dos dados do cliente  
 - Validação de estoque  
 - Finalização do pedido
+- Comprovante Digital
 
-<img width="933" height="597" alt="image" src="https://github.com/user-attachments/assets/c60cc114-a04f-4da9-bafe-aa2ff94ab5c2" />
-  
+<img width="592" height="870" alt="image" src="https://github.com/user-attachments/assets/e98eb0d0-9b96-4950-b885-c8a1d1b43a4a" />
+<img width="491" height="776" alt="image" src="https://github.com/user-attachments/assets/4a6e7c3f-53c4-4b13-b613-a9d024f47784" />
 
-### 📦 Meus Pedidos (NOVO v1.1.0)
+### 📦 Meus Pedidos
 - Listagem de todos os pedidos realizados  
 - Visualização detalhada  
 - **Cancelar pedidos pendentes**  
 - Atualização automática do estoque ao cancelar  
 
-<img width="937" height="536" alt="image" src="https://github.com/user-attachments/assets/6d8741bb-1c3f-47d2-a81f-4e639957b97f" />
+<img width="926" height="529" alt="image" src="https://github.com/user-attachments/assets/3e1572e9-bb6b-400e-becd-6e756ccbe6e5" />
+<img width="759" height="651" alt="image" src="https://github.com/user-attachments/assets/3f5e2ed2-ff2b-4dcb-9eb6-2372178d9559" />
 
 ---
 
-## **3.3. Backend — Pedidos & Regras de Negócio**
+## **3.3. Regras de Negócio**
 - Criação de pedidos vinculados ao cliente  
 - EstoqueInsuficienteException  
 - Validações completas e consistentes  
@@ -118,7 +118,7 @@ A versão 1.1.0 busca consolidar um ecossistema completo de e-commerce com funci
 
 ---
 
-## **3.4. Painel Administrativo**
+## **3.4. Módulo do Administrador**
 
 ### 📊 Dashboard
 - KPIs  
@@ -189,7 +189,7 @@ A versão 1.1.0 busca consolidar um ecossistema completo de e-commerce com funci
 
 # 🧠 5. Ferramentas de I.A Utilizadas
 
-### 🤖 Gemini 2.5 PRO (Google)
+### 🤖 Gemini 2.5/3.0 PRO (Google)
 Usado para:
 - Planejamento da arquitetura  
 - Engenharia de prompts  
