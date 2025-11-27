@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,9 +30,7 @@ import {
   QrCode, 
   Barcode,
   CheckCircle,
-  Printer,
-  Download,
-  Store
+  Printer
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -155,8 +153,13 @@ export default function CartPage() {
       setConfirmedOrder(newOrder); // Salva o pedido retornado para exibir
       setIsReceiptOpen(true); // Abre o modal de comprovante
       
-    } catch (error) {
-      toast.error('Erro ao finalizar pedido. Tente novamente.');
+    } catch (error: any) {
+      if (error.response && error.response.data && error.response.data.erro) {
+        toast.error(error.response.data.erro);
+      } else {
+        toast.error('Erro ao finalizar pedido. Tente novamente.');
+      }
+      console.error(error);
     } finally {
       setIsProcessing(false);
     }
@@ -261,7 +264,13 @@ export default function CartPage() {
 
       {/* --- MODAL DE CHECKOUT (Dados e Pagamento) --- */}
       <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        {/* MODIFICAÇÃO: Adicionado classes para scrollbar moderna 
+            [&::-webkit-scrollbar]:w-1.5  -> Largura fina
+            [&::-webkit-scrollbar-track]:bg-transparent -> Fundo transparente
+            [&::-webkit-scrollbar-thumb]:bg-slate-700/50 -> Cor do "polegar"
+            [&::-webkit-scrollbar-thumb]:rounded-full -> Arredondado
+        */}
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-700/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-700">
           <DialogHeader>
             <DialogTitle>Finalizar Compra</DialogTitle>
             <DialogDescription>Confirme os dados de entrega e escolha o pagamento.</DialogDescription>
@@ -270,7 +279,7 @@ export default function CartPage() {
           <div className="grid gap-6 py-4">
             <div className="space-y-4">
               <h4 className="font-medium flex items-center gap-2 text-primary"><MapPin className="w-4 h-4" /> Dados de Entrega</h4>
-              <div className="grid gap-4 p-4 border rounded-lg bg-slate-50 dark:bg-slate-900">
+              <div className="grid gap-4 p-4 border rounded-lg bg-transparent">
                 <div className="grid grid-cols-12 gap-4">
                   <div className="col-span-4 space-y-2">
                     <Label htmlFor="cep">CEP</Label>
@@ -344,7 +353,6 @@ export default function CartPage() {
         <DialogContent className="max-w-[500px] p-0 overflow-hidden border-2">
             {confirmedOrder && (
                 <div className="flex flex-col bg-white dark:bg-slate-950">
-                    {/* Cabeçalho do Recibo */}
                     <div className="bg-primary p-6 text-primary-foreground text-center">
                         <div className="mx-auto w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3">
                             <CheckCircle className="w-8 h-8" />
@@ -354,7 +362,6 @@ export default function CartPage() {
                     </div>
 
                     <div className="p-6 space-y-6">
-                        {/* Info Básica */}
                         <div className="text-center space-y-1">
                             <p className="text-sm text-muted-foreground">ID do Pedido</p>
                             <p className="text-xl font-mono font-bold tracking-wider">#{confirmedOrder.id.toString().padStart(6, '0')}</p>
@@ -363,7 +370,6 @@ export default function CartPage() {
 
                         <Separator className="border-dashed" />
 
-                        {/* Detalhes do Cliente e Entrega */}
                         <div className="space-y-4 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Cliente:</span>
@@ -388,7 +394,6 @@ export default function CartPage() {
 
                         <Separator className="border-dashed" />
 
-                        {/* Lista de Itens (Resumida) */}
                         <div className="space-y-2">
                             <span className="text-xs font-bold uppercase text-muted-foreground">Itens Adquiridos</span>
                             <div className="max-h-[150px] overflow-y-auto pr-2 space-y-2">
@@ -403,14 +408,12 @@ export default function CartPage() {
 
                         <Separator className="border-dashed" />
 
-                        {/* Total */}
                         <div className="flex justify-between items-end">
                             <span className="text-sm font-medium text-muted-foreground">Valor Total</span>
                             <span className="text-3xl font-bold text-primary">R$ {confirmedOrder.valorTotal.toFixed(2)}</span>
                         </div>
                     </div>
 
-                    {/* Rodapé / Ações */}
                     <div className="bg-muted/30 p-4 border-t flex gap-2 justify-center">
                         <Button variant="outline" className="flex-1" onClick={() => window.print()}>
                             <Printer className="w-4 h-4 mr-2" /> Imprimir
