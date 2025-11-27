@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form'; // Importando react-hook-form que foi usado no redesign
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,7 @@ import { Loader2, ArrowLeft } from 'lucide-react';
 import logoWhite from '@/icons/logo-icon-white.ico';
 import logoBlack from '@/icons/logo-icon-black.ico';
 
-// Schema de validação (mantido)
+// Schema de validação
 const loginSchema = z.object({
   email: z.string().email('E-mail inválido'),
   senha: z.string().min(1, 'Senha é obrigatória'),
@@ -34,10 +34,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Redirecionar para a página que o usuário tentou acessar ou para a home
-  const from = location.state?.from?.pathname || '/';
+  // Removido useLocation para simplificar o foco na correção do admin
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -50,18 +47,34 @@ export default function LoginPage() {
   async function onSubmit(data: LoginFormValues) {
     setIsLoading(true);
     try {
+      // 1. Realiza o login
       await login(data.email, data.senha);
+      
+      // 2. Recupera o estado atualizado IMEDIATAMENTE
+      const currentUser = useAuthStore.getState().user;
+      
+      console.log("Usuário logado:", currentUser); // DEBUG: Verifique no console o que está vindo
+
       toast.success('Login realizado com sucesso!');
-      navigate(from, { replace: true });
+      
+      // 3. Redirecionamento baseado na ROLE
+      if (currentUser?.role === 'ADMIN') {
+        console.log("Redirecionando para ADMIN...");
+        navigate('/admin', { replace: true });
+      } else {
+        console.log("Redirecionando para HOME...");
+        navigate('/', { replace: true });
+      }
+
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Erro ao realizar login. Verifique suas credenciais.');
+      console.error("Erro no login:", error);
+      toast.error(error.response?.data?.message || 'Email ou senha incorretos');
     } finally {
       setIsLoading(false);
     }
   }
 
   return (
-    // Container principal com fundo e overflow hidden
     <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-950 relative overflow-hidden transition-colors duration-300">
 
        {/* --- EFEITOS DE FUNDO (Blobs Animados) --- */}
@@ -81,16 +94,11 @@ export default function LoginPage() {
       </div>
 
       {/* --- CARD DE LOGIN TRANSLÚCIDO --- */}
-      {/* z-10 para ficar sobre os blobs.
-          bg-white/30 e backdrop-blur-md criam o efeito de vidro. */}
       <Card className="w-full max-w-md shadow-2xl relative z-10 bg-white/30 dark:bg-slate-950/40 backdrop-blur-md border-white/20 dark:border-slate-800/50">
         <CardHeader className="space-y-1 flex flex-col items-center text-center pb-2">
           
-          {/* --- SUBSTITUIÇÃO DO ÍCONE PELA LOGO --- */}
           <div className="relative h-16 w-16 mb-4 hover:scale-110 transition-transform duration-300">
-             {/* Logo Preta (Light Mode) */}
              <img src={logoBlack} alt="Logo" className="h-full w-full object-contain absolute inset-0 transition-opacity opacity-100 dark:opacity-0" />
-             {/* Logo Branca (Dark Mode) */}
              <img src={logoWhite} alt="Logo" className="h-full w-full object-contain absolute inset-0 transition-opacity opacity-0 dark:opacity-100" />
           </div>
 
@@ -109,7 +117,6 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>E-mail</FormLabel>
                     <FormControl>
-                      {/* Inputs também levemente translúcidos */}
                       <Input placeholder="seu@email.com" {...field} className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm focus-visible:ring-primary" />
                     </FormControl>
                     <FormMessage />
@@ -123,9 +130,8 @@ export default function LoginPage() {
                   <FormItem>
                     <div className="flex items-center justify-between">
                         <FormLabel>Senha</FormLabel>
-                        <Link to="/esqueceu-senha" className="text-xs text-primary hover:underline">
-                            Esqueceu a senha?
-                        </Link>
+                        {/* Link fictício para esqueceu a senha */}
+                        <span className="text-xs text-muted-foreground cursor-not-allowed opacity-70">Esqueceu a senha?</span>
                     </div>
                     <FormControl>
                       <Input type="password" placeholder="••••••" {...field} className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm focus-visible:ring-primary" />
