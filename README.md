@@ -67,6 +67,14 @@ A versão 1.1.3 busca consolidar um ecossistema completo de e-commerce com funci
 
 ## **3.2. Módulo do Cliente**
 
+### 💻 Home
+- Banners Dinâmicos rolando
+- Seção de Políticas de Garantia
+- Produtos em Destaque
+- Dark Mode / White Mode
+
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/772391f4-0cf0-407f-80f3-ee17519233b7" />
+
 ### 👤 Perfil
 - Visualizar dados pessoais  
 - Editar nome e endereço  
@@ -79,8 +87,7 @@ A versão 1.1.3 busca consolidar um ecossistema completo de e-commerce com funci
 - Página de detalhes
 - Página Detalhada do Produto
 
-<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/54d4f77c-29c9-4f9a-9723-70d5c161f964" />
-<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/1f2ad10e-402d-4a89-ab44-e3a1b6447da7" />
+<img width="1919" height="908" alt="image" src="https://github.com/user-attachments/assets/26dfc715-e73d-46b6-ade8-a707663da721" />
 
 ### 🛒 Carrinho
 - Adicionar itens  
